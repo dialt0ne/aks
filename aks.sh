@@ -31,8 +31,7 @@ create_auth_info()
 	EC2_SECRET=$1 && shift
 	# per-account directory 
 	AWS_ACCT_DIR=$AWS_DIR/auth/$AWS_ACCOUNT
-	mkdir $AWS_ACCT_DIR
-	chmod 700 $AWS_ACCT_DIR
+	mkdir --mode=0700 $AWS_ACCT_DIR
 	pushd $AWS_ACCT_DIR > /dev/null
 	# signing certificate
 	SUBJ="/C=''/ST=''/L=''/O=''/OU=''/CN='$AWS_ACCOUNT'"
@@ -84,6 +83,16 @@ aks()
 	case "$1" in
 		create)
 			AWS_ACCOUNT=$2
+			if [ "$AWS_ACCOUNT" = "" ]
+			then
+				echo "error, must provide account name to create"
+				return 1
+			fi
+			if [ -d "$AWS_DIR/auth/$AWS_ACCOUNT" ]
+			then
+				echo "error, account '$AWS_ACCOUNT' already exists"
+				return 1
+			fi
 			echo "new account will be '$AWS_ACCOUNT'"
 			echo "enter EC2 account id [5th field of IAM User ARN]:"
 			read EC2_ID
@@ -114,7 +123,12 @@ aks()
 			;;
 		use)
 			AWS_ACCOUNT=$2
-			if [ -f $AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT-env.sh ]
+			if [ "$AWS_ACCOUNT" = "" ]
+			then
+				echo "error, must provide account name to use"
+				return 1
+			fi
+			if [ -f "$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT-env.sh" ]
 			then
 				source $AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT-env.sh
 				echo switched to account "$AWS_ACCOUNT"
