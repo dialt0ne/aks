@@ -11,10 +11,11 @@ aks is here to help.
 
 aks modifies the running bash environment variables that are needed by the
 AWS CLI tools. It does this by creating a subdirectory in $HOME/aws/auth
-for each IAM account - using a name you specify. When creating a new account,
-aks will auto generate a signing ceritificate for it. aks also has the option to
-import the environment for locating the AWS CLI tools (e.g. EC2_HOME,
-EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.)
+for each IAM account (using a name you specify) storing all the key information
+there and then sourcing the environment from the created files. When creating a
+new account, aks will generate a signing ceritificate for you. aks also has the
+option to import the environment for locating the AWS CLI tools (e.g. EC2_HOME,
+EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.) from a global script.
 
 ### How to install
 
