@@ -31,6 +31,8 @@ EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.)
 
 ### Usage
 
+	source $HOME/aws/aks.sh
+	
 	usage:
 	   aks create [newaccountname]
 	   aks id
