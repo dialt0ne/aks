@@ -26,6 +26,7 @@ EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.)
 ### Configuration
 
 	cd $HOME/aws
+	mkdir auth
 	vi aks.sh global.sh
 	# customize variables as needed
 
