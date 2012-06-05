@@ -3,11 +3,6 @@
 #
 # ATonns Fri Jun  1 15:47:00 EDT 2012
 #
-# usage:
-#	aks create [newaccountname]
-#	aks id
-#	aks list
-#	aks use [accountname]
 #
 
 AWS_DIR="$HOME/aws"
@@ -20,6 +15,7 @@ then
 fi
 
 # function to create all key files for authenticating with AWS
+unset -f create_auth_info
 create_auth_info()
 {
 	# args
@@ -78,6 +74,7 @@ create_auth_info()
 	popd > /dev/null
 }
 
+unset -f aks
 aks()
 {
 	case "$1" in
@@ -139,12 +136,18 @@ aks()
 			fi
 			;;
 		*)
-			echo unknown arg: "$1"
+			echo "unknown arg: '$1'"
+			echo "usage:"
+			echo "   aks create [newaccountname]"
+			echo "   aks id"
+			echo "   aks list"
+			echo "   aks use [accountname]"
 			return 1
 			;;
 	esac
 }
 
+unset -f _aks
 _aks() 
 {
 	local cur prev opts
