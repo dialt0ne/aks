@@ -17,6 +17,11 @@ new account, aks will generate a signing ceritificate for you. aks also has the
 option to import the environment for locating the AWS CLI tools (e.g. EC2_HOME,
 EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.) from a global script.
 
+### Features
+
+* uses bash tab-completion for arguments, account names
+* Sets proper permissions on files/directories so only you can see your keys
+
 ### How to install
 
 	git clone git://github.com/dialt0ne/aks.git
@@ -41,3 +46,6 @@ EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.) from a global script.
 	   aks list
 	   aks use [accountname]
 
+### ToDo
+
+* create an import function to copy existing IAM keys/certs to aks directory structure
