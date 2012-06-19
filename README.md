@@ -19,8 +19,9 @@ EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.) from a global script.
 
 ### Features
 
-* uses bash tab-completion for arguments, account names
+* Uses bash tab-completion for arguments, account names
 * Sets proper permissions on files/directories so only you can see your keys
+* Can imports keys/certificates based on existing environment variables
 
 ### How to install
 
@@ -43,9 +44,11 @@ EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.) from a global script.
 	usage:
 	   aks create [newaccountname]
 	   aks id
+	   aks import [newaccountname]
 	   aks list
 	   aks use [accountname]
 
 ### ToDo
 
-* create an import function to copy existing IAM keys/certs to aks directory structure
+* await feedback from users
+

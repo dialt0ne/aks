@@ -18,29 +18,60 @@ fi
 unset -f create_auth_info
 create_auth_info()
 {
+	process_auth_info create $*
+}
+
+# function to import all key files for authenticating with AWS
+unset -f import_auth_info
+import_auth_info()
+{
+	process_auth_info import $*
+}
+
+# function to create all key files for authenticating with AWS
+unset -f process_auth_info
+process_auth_info()
+{
 	# args
-	local AWS_DIR AWS_ACCT_DIR AWS_ACCOUNT EC2_ID EC2_ACCESS EC2_SECRET
+	local AKS_OPER AWS_DIR AWS_ACCT_DIR AWS_ACCOUNT EC2_ID EC2_ACCESS EC2_SECRET
+	local EC2_PRIVATE_KEY EC2_CERT OLD_EC2_PRIVATE_KEY OLD_EC2_CERT
+	AKS_OPER=$1 && shift
 	AWS_DIR=$1 && shift
 	AWS_ACCOUNT=$1 && shift
+	AWS_ACCT_DIR=$AWS_DIR/auth/$AWS_ACCOUNT
 	EC2_ID=$1 && shift
 	EC2_ACCESS=$1 && shift
 	EC2_SECRET=$1 && shift
+	if [ "$AKS_OPER" = "import" ]
+	then
+		OLD_EC2_PRIVATE_KEY=$1 && shift
+		OLD_EC2_CERT=$1 && shift
+	fi
+	EC2_PRIVATE_KEY=pk-$AWS_ACCOUNT.pem
+	EC2_CERT=cert-$AWS_ACCOUNT.pem
 	# per-account directory 
-	AWS_ACCT_DIR=$AWS_DIR/auth/$AWS_ACCOUNT
 	mkdir --mode=0700 $AWS_ACCT_DIR
 	pushd $AWS_ACCT_DIR > /dev/null
-	# signing certificate
-	SUBJ="/C=''/ST=''/L=''/O=''/OU=''/CN='$AWS_ACCOUNT'"
-	# create a 2048 bit key
-	openssl genrsa -out pk-$AWS_ACCOUNT-rsa.pem 2048 2> /dev/null
-	# ~10 year expiration
-	openssl req -new -subj $SUBJ -x509 -key pk-$AWS_ACCOUNT-rsa.pem -out cert-$AWS_ACCOUNT.pem -days 3650
-	# convert to pkcs8 format for amazon
-	openssl pkcs8 -topk8 -in pk-$AWS_ACCOUNT-rsa.pem -nocrypt > pk-$AWS_ACCOUNT.pem
-	# remove old rsa key
-	rm -f pk-$AWS_ACCOUNT-rsa.pem
-	chmod 400 cert-$AWS_ACCOUNT.pem
-	chmod 400 pk-$AWS_ACCOUNT.pem
+	# signing cert
+	if [ "$AKS_OPER" = "create" ]
+	then
+		# signing certificate
+		SUBJ="/C=''/ST=''/L=''/O=''/OU=''/CN='$AWS_ACCOUNT'"
+		# create a 2048 bit key
+		openssl genrsa -out pk-$AWS_ACCOUNT-rsa.pem 2048 2> /dev/null
+		# convert to pkcs8 format for amazon
+		openssl pkcs8 -topk8 -in pk-$AWS_ACCOUNT-rsa.pem -nocrypt > $EC2_PRIVATE_KEY
+		# ~10 year expiration
+		openssl req -new -subj $SUBJ -x509 -key pk-$AWS_ACCOUNT-rsa.pem -out $EC2_CERT -days 3650
+		# remove old rsa key
+		rm -f pk-$AWS_ACCOUNT-rsa.pem
+	elif [ "$AKS_OPER" = "import" ]
+	then
+		cp -p $OLD_EC2_PRIVATE_KEY $EC2_PRIVATE_KEY
+		cp -p $OLD_EC2_CERT $EC2_CERT
+	fi
+	chmod 400 $EC2_PRIVATE_KEY
+	chmod 400 $EC2_CERT
 	# cred file
 	(
 		echo "AWSAccessKeyId=$EC2_ACCESS"
@@ -113,6 +144,49 @@ aks()
 				return 1
 			fi
 			;;
+		import)
+			AWS_ACCOUNT=$2
+			if [ "$AWS_ACCOUNT" = "" ]
+			then
+				echo "error, must provide account name to import"
+				return 1
+			fi
+			if [ -d "$AWS_DIR/auth/$AWS_ACCOUNT" ]
+			then
+				echo "error, account '$AWS_ACCOUNT' already exists"
+				return 1
+			fi
+			echo "imported account will be '$AWS_ACCOUNT'"
+			if [ "$EC2_ID" = "" ]
+			then
+				echo "error, environment varible EC2_ID is missing"
+				return 1
+			fi
+			if [ "$EC2_ACCESS" = "" ]
+			then
+				echo "error, environment varible EC2_ACCESS is missing"
+				return 1
+			fi
+			if [ "$EC2_SECRET" = "" ]
+			then
+				echo "error, environment varible EC2_SECRET is missing"
+				return 1
+			fi
+			if [ "$EC2_PRIVATE_KEY" = "" ]
+			then
+				echo "error, environment varible EC2_PRIVATE_KEY is missing"
+				return 1
+			fi
+			if [ "$EC2_CERT" = "" ]
+			then
+				echo "error, environment varible EC2_CERT is missing"
+				return 1
+			fi
+			import_auth_info $AWS_DIR $AWS_ACCOUNT $EC2_ID $EC2_ACCESS $EC2_SECRET $EC2_PRIVATE_KEY $EC2_CERT
+			echo imported info for account "$AWS_ACCOUNT"
+			aks use $AWS_ACCOUNT
+			return 0
+			;;
 		list)
 			echo "current available accounts are:"
 			ls --format=single-column --color=never $AWS_DIR/auth
@@ -154,7 +228,7 @@ _aks()
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
-	opts="create id list use"
+	opts="create id import list use"
  
 	local accounts=$(ls --format=single-column --color=never $AWS_DIR/auth)
 	case "${prev}" in
