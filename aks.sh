@@ -15,22 +15,22 @@ then
 fi
 
 # function to create all key files for authenticating with AWS
-unset -f create_auth_info
-create_auth_info()
+unset -f _aks_create_auth_info
+_aks_create_auth_info()
 {
-	process_auth_info create $*
+	_aks_process_auth_info create $*
 }
 
 # function to import all key files for authenticating with AWS
-unset -f import_auth_info
-import_auth_info()
+unset -f _aks_import_auth_info
+_aks_import_auth_info()
 {
-	process_auth_info import $*
+	_aks_process_auth_info import $*
 }
 
-# function to create all key files for authenticating with AWS
-unset -f process_auth_info
-process_auth_info()
+# internal function to process all key info for authenticating with AWS
+unset -f _aks_process_auth_info
+_aks_process_auth_info()
 {
 	# args
 	local AKS_OPER AWS_DIR AWS_ACCT_DIR AWS_ACCOUNT EC2_ID EC2_ACCESS EC2_SECRET
@@ -38,7 +38,7 @@ process_auth_info()
 	AKS_OPER=$1 && shift
 	AWS_DIR=$1 && shift
 	AWS_ACCOUNT=$1 && shift
-	AWS_ACCT_DIR=$AWS_DIR/auth/$AWS_ACCOUNT
+	AWS_ACCT_DIR="$AWS_DIR/auth/$AWS_ACCOUNT"
 	EC2_ID=$1 && shift
 	EC2_ACCESS=$1 && shift
 	EC2_SECRET=$1 && shift
@@ -47,8 +47,8 @@ process_auth_info()
 		OLD_EC2_PRIVATE_KEY=$1 && shift
 		OLD_EC2_CERT=$1 && shift
 	fi
-	EC2_PRIVATE_KEY=pk-$AWS_ACCOUNT.pem
-	EC2_CERT=cert-$AWS_ACCOUNT.pem
+	EC2_PRIVATE_KEY="pk-$AWS_ACCOUNT.pem"
+	EC2_CERT="cert-$AWS_ACCOUNT.pem"
 	# per-account directory 
 	mkdir --mode=0700 $AWS_ACCT_DIR
 	pushd $AWS_ACCT_DIR > /dev/null
@@ -110,28 +110,32 @@ aks()
 {
 	case "$1" in
 		create)
-			AWS_ACCOUNT=$2
-			if [ "$AWS_ACCOUNT" = "" ]
+			TARGET_AWS_ACCOUNT="$2"
+			if [ "$TARGET_AWS_ACCOUNT" = "" ]
 			then
 				echo "error, must provide account name to create"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
-			if [ -d "$AWS_DIR/auth/$AWS_ACCOUNT" ]
+			if [ -d "$AWS_DIR/auth/$TARGET_AWS_ACCOUNT" ]
 			then
-				echo "error, account '$AWS_ACCOUNT' already exists"
+				echo "error, account '$TARGET_AWS_ACCOUNT' already exists"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
-			echo "new account will be '$AWS_ACCOUNT'"
+			echo "new account will be '$TARGET_AWS_ACCOUNT'"
 			echo "enter EC2 account id [5th field of IAM User ARN]:"
 			read EC2_ID
 			echo "enter EC2 access key:"
 			read EC2_ACCESS
 			echo "enter EC2 secret key:"
 			read EC2_SECRET
-			create_auth_info $AWS_DIR $AWS_ACCOUNT $EC2_ID $EC2_ACCESS $EC2_SECRET
-			echo "your singing certificate:"
+			AWS_ACCOUNT="$TARGET_AWS_ACCOUNT"
+			_aks_create_auth_info $AWS_DIR $AWS_ACCOUNT $EC2_ID $EC2_ACCESS $EC2_SECRET
+			echo "your new singing certificate:"
 			cat $AWS_DIR/auth/$AWS_ACCOUNT/cert-$AWS_ACCOUNT.pem
 			aks use $AWS_ACCOUNT
+			unset TARGET_AWS_ACCOUNT
 			return 0
 			;;
 		id)
@@ -145,46 +149,55 @@ aks()
 			fi
 			;;
 		import)
-			AWS_ACCOUNT=$2
-			if [ "$AWS_ACCOUNT" = "" ]
+			TARGET_AWS_ACCOUNT="$2"
+			if [ "$TARGET_AWS_ACCOUNT" = "" ]
 			then
 				echo "error, must provide account name to import"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
-			if [ -d "$AWS_DIR/auth/$AWS_ACCOUNT" ]
+			if [ -d "$AWS_DIR/auth/$TARGET_AWS_ACCOUNT" ]
 			then
-				echo "error, account '$AWS_ACCOUNT' already exists"
+				echo "error, account '$TARGET_AWS_ACCOUNT' already exists"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
-			echo "imported account will be '$AWS_ACCOUNT'"
+			echo "imported account will be '$TARGET_AWS_ACCOUNT'"
 			if [ "$EC2_ID" = "" ]
 			then
 				echo "error, environment varible EC2_ID is missing"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
 			if [ "$EC2_ACCESS" = "" ]
 			then
 				echo "error, environment varible EC2_ACCESS is missing"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
 			if [ "$EC2_SECRET" = "" ]
 			then
 				echo "error, environment varible EC2_SECRET is missing"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
 			if [ "$EC2_PRIVATE_KEY" = "" ]
 			then
 				echo "error, environment varible EC2_PRIVATE_KEY is missing"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
 			if [ "$EC2_CERT" = "" ]
 			then
 				echo "error, environment varible EC2_CERT is missing"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
-			import_auth_info $AWS_DIR $AWS_ACCOUNT $EC2_ID $EC2_ACCESS $EC2_SECRET $EC2_PRIVATE_KEY $EC2_CERT
-			echo imported info for account "$AWS_ACCOUNT"
+			AWS_ACCOUNT="$TARGET_AWS_ACCOUNT"
+			_aks_import_auth_info $AWS_DIR $AWS_ACCOUNT $EC2_ID $EC2_ACCESS $EC2_SECRET $EC2_PRIVATE_KEY $EC2_CERT
+			echo "imported info for account '$AWS_ACCOUNT'"
 			aks use $AWS_ACCOUNT
+			unset TARGET_AWS_ACCOUNT
 			return 0
 			;;
 		list)
@@ -193,19 +206,23 @@ aks()
 			return 0
 			;;
 		use)
-			AWS_ACCOUNT=$2
-			if [ "$AWS_ACCOUNT" = "" ]
+			TARGET_AWS_ACCOUNT="$2"
+			if [ "$TARGET_AWS_ACCOUNT" = "" ]
 			then
-				echo "error, must provide account name to use"
+				echo "error, must provide account name to use. account not switched"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
-			if [ -f "$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT-env.sh" ]
+			if [ -f "$AWS_DIR/auth/$TARGET_AWS_ACCOUNT/$TARGET_AWS_ACCOUNT-env.sh" ]
 			then
+				AWS_ACCOUNT="$TARGET_AWS_ACCOUNT"
 				source $AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT-env.sh
-				echo switched to account "$AWS_ACCOUNT"
+				echo "switched to account '$AWS_ACCOUNT'"
+				unset TARGET_AWS_ACCOUNT
 				return 0
 			else
-				echo "error, can't find '$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT-env.sh'"
+				echo "error, can't find '$AWS_DIR/auth/$TARGET_AWS_ACCOUNT/$TARGET_AWS_ACCOUNT-env.sh'"
+				unset TARGET_AWS_ACCOUNT
 				return 1
 			fi
 			;;
@@ -214,6 +231,7 @@ aks()
 			echo "usage:"
 			echo "   aks create [newaccountname]"
 			echo "   aks id"
+			echo "   aks import [newaccountname]"
 			echo "   aks list"
 			echo "   aks use [accountname]"
 			return 1
@@ -221,17 +239,18 @@ aks()
 	esac
 }
 
-unset -f _aks
-_aks() 
+unset -f _aks_complete
+_aks_complete() 
 {
-	local cur prev opts
+	local CURRENT PREVIOUS OPTIONS
 	COMPREPLY=()
-	cur="${COMP_WORDS[COMP_CWORD]}"
-	prev="${COMP_WORDS[COMP_CWORD-1]}"
-	opts="create id import list use"
+	CURRENT="${COMP_WORDS[COMP_CWORD]}"
+	PREVIOUS="${COMP_WORDS[COMP_CWORD-1]}"
+	OPTIONS="create id import list use"
  
-	local accounts=$(ls --format=single-column --color=never $AWS_DIR/auth)
-	case "${prev}" in
+	# each subdir is a 'known' account
+	local ACCOUNTS=$(ls --format=single-column --color=never $AWS_DIR/auth)
+	case "${PREVIOUS}" in
 		create)
 			# no args
 			COMPREPLY=()
@@ -248,17 +267,17 @@ _aks()
 			return 0
 			;;
 		use)
-			COMPREPLY=( $(compgen -W "${accounts}" -- ${cur}) )
+			COMPREPLY=( $(compgen -W "${ACCOUNTS}" -- ${CURRENT}) )
 			return 0
 			;;
 		*)
 		;;
 	esac
 
-	#
-	COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
+	# if there's no previous arg, present available options
+	COMPREPLY=($(compgen -W "${OPTIONS}" -- ${CURRENT}))
 	return 0
 }
 
-complete -F _aks aks
+complete -F _aks_complete aks
 
