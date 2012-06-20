@@ -49,9 +49,11 @@ EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.) from a global script.
 	   aks use [accountname]
 
 When creating an account, you will need from the AWS IAM Console, "Security Credentials" tab:
+
 * your EC2 account id (the 5th field of IAM User ARN)
 * your EC2 access key
 * your EC2 secret key
+
 Then you will be provided with your signing certificate, which you can copy and paste into the AWS IAM Console
 
 ### ToDo
