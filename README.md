@@ -59,4 +59,5 @@ Then you will be provided with your signing certificate, which you can copy and 
 ### ToDo
 
 * await feedback from users
+* add more error checking to inputs on create/import
 
