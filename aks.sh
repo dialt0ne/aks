@@ -124,15 +124,33 @@ aks()
 				return 1
 			fi
 			echo "new account will be '$TARGET_AWS_ACCOUNT'"
-			echo "enter EC2 account id [5th field of IAM User ARN]:"
-			read EC2_ID
-			echo "enter EC2 access key:"
-			read EC2_ACCESS
-			echo "enter EC2 secret key:"
-			read EC2_SECRET
+			TARGET_EC2_ID=""
+			while [ -z $TARGET_EC2_ID ]
+			do
+				echo "enter EC2 account id [5th field of IAM User ARN]:"
+				read TARGET_EC2_ID
+				# ToDo - add error checking here
+			done
+			TARGET_EC2_ACCESS=""
+			while [ -z $TARGET_EC2_ACCESS ]
+			do
+				echo "enter EC2 access key:"
+				read TARGET_EC2_ACCESS
+				# ToDo - add error checking here
+			done
+			TARGET_EC2_SECRET=""
+			while [ -z $TARGET_EC2_SECRET ]
+			do
+				echo "enter EC2 secret key:"
+				read TARGET_EC2_SECRET
+				# ToDo - add error checking here
+			done
+			EC2_ID="TARGET_EC2_ID"
+			EC2_ACCESS="TARGET_EC2_ACCESS"
+			EC2_SECRET="TARGET_EC2_SECRET"
 			AWS_ACCOUNT="$TARGET_AWS_ACCOUNT"
 			_aks_create_auth_info $AWS_DIR $AWS_ACCOUNT $EC2_ID $EC2_ACCESS $EC2_SECRET
-			echo "your new singing certificate:"
+			echo "your new singing certificate [copy/paste into IAM Signing Certificates]:"
 			cat $AWS_DIR/auth/$AWS_ACCOUNT/cert-$AWS_ACCOUNT.pem
 			aks use $AWS_ACCOUNT
 			unset TARGET_AWS_ACCOUNT
