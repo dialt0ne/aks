@@ -56,13 +56,13 @@ When creating an account, you will need from the AWS IAM Console, "Security Cred
 
 Then you will be provided with your signing certificate, which you can copy and paste into the AWS IAM Console.
 
-When importing your IAM credentials from the existing environment, the follow variable need to be set
+When importing your IAM credentials from the existing environment, the follow variable need to be set:
 
-	EC2_ID
-	EC2_ACCESS
-	EC2_SECRET
-	EC2_PRIVATE_KEY
-	EC2_CERT
+* @EC2_ID@
+* @EC2_ACCESS@
+* @EC2_SECRET@
+* @EC2_PRIVATE_KEY@
+* @EC2_CERT@
 
 ### ToDo
 
