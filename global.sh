@@ -14,7 +14,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-export AWS_DIR=$HOME/aws
+if [ -z "$AWS_DIR" ]
+then
+	export AWS_DIR=$HOME/aws
+fi
 pathmunge () {
   if ! echo $PATH | egrep -q "(^|:)$1($|:)" ; then
     if [ "$2" = "after" ] ; then

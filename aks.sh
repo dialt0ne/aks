@@ -19,7 +19,10 @@
 #   limitations under the License.
 #
 
-AWS_DIR="$HOME/aws"
+if [ -z "$AWS_DIR" ]
+then
+	export AWS_DIR="$HOME/aws"
+fi
 AWS_ACCOUNT="(none)"
 
 # script that sets up paths to AWS CLI tools
