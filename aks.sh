@@ -50,12 +50,11 @@ unset -f _aks_process_auth_info
 _aks_process_auth_info()
 {
 	# args
-	local AKS_OPER AWS_DIR AWS_ACCT_DIR AWS_ACCOUNT EC2_ID EC2_ACCESS EC2_SECRET
+	local AKS_OPER AWS_DIR AWS_ACCOUNT EC2_ID EC2_ACCESS EC2_SECRET
 	local EC2_PRIVATE_KEY EC2_CERT OLD_EC2_PRIVATE_KEY OLD_EC2_CERT
 	AKS_OPER=$1 && shift
 	AWS_DIR=$1 && shift
 	AWS_ACCOUNT=$1 && shift
-	AWS_ACCT_DIR="$AWS_DIR/auth/$AWS_ACCOUNT"
 	EC2_ID=$1 && shift
 	EC2_ACCESS=$1 && shift
 	EC2_SECRET=$1 && shift
@@ -67,8 +66,8 @@ _aks_process_auth_info()
 	EC2_PRIVATE_KEY="pk-$AWS_ACCOUNT.pem"
 	EC2_CERT="cert-$AWS_ACCOUNT.pem"
 	# per-account directory 
-	mkdir --mode=0700 $AWS_ACCT_DIR
-	pushd $AWS_ACCT_DIR > /dev/null
+	mkdir --mode=0700 $AWS_DIR/auth/$AWS_ACCOUNT
+	pushd $AWS_DIR/auth/$AWS_ACCOUNT > /dev/null
 	# signing cert
 	if [ "$AKS_OPER" = "create" ]
 	then
@@ -112,11 +111,11 @@ _aks_process_auth_info()
 		echo "export EC2_ID=$EC2_ID";
 		echo "export EC2_ACCESS=$EC2_ACCESS";
 		echo "export EC2_SECRET=$EC2_SECRET";
-		echo "export EC2_PRIVATE_KEY="$AWS_ACCT_DIR/pk-$AWS_ACCOUNT.pem;
-		echo "export EC2_CERT="$AWS_ACCT_DIR/cert-$AWS_ACCOUNT.pem;
-		echo "export AWS_CREDENTIAL_FILE=$AWS_ACCT_DIR/$AWS_ACCOUNT.cred"
-		echo "alias s3cmd='s3cmd --config=$AWS_ACCT_DIR/$AWS_ACCOUNT.s3cfg'"
-		echo "alias aws='aws --secrets-file=$AWS_ACCT_DIR/$AWS_ACCOUNT.awssecrets'"
+		echo "export EC2_PRIVATE_KEY=\$AWS_DIR/auth/$AWS_ACCOUNT/pk-$AWS_ACCOUNT.pem";
+		echo "export EC2_CERT=\$AWS_DIR/auth/$AWS_ACCOUNT/cert-$AWS_ACCOUNT.pem";
+		echo "export AWS_CREDENTIAL_FILE=\$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT.cred"
+		echo "alias s3cmd='s3cmd --config=\$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT.s3cfg'"
+		echo "alias aws='aws --secrets-file=\$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT.awssecrets'"
 	) > $AWS_ACCOUNT-env.sh
 	chmod 500 $AWS_ACCOUNT-env.sh
 	popd > /dev/null
