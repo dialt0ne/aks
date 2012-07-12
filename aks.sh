@@ -237,7 +237,7 @@ aks()
 			;;
 		list)
 			echo "current available accounts are:"
-			ls --format=single-column --color=never $AWS_DIR/auth
+			ls -1 $AWS_DIR/auth
 			return 0
 			;;
 		use)
@@ -284,7 +284,7 @@ _aks_complete()
 	OPTIONS="create id import list use"
  
 	# each subdir is a 'known' account
-	local ACCOUNTS=$(ls --format=single-column --color=never $AWS_DIR/auth)
+	local ACCOUNTS=$(ls -1 $AWS_DIR/auth)
 	case "${PREVIOUS}" in
 		create)
 			# no args
