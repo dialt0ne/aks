@@ -64,6 +64,8 @@ When importing your IAM credentials from the existing environment, the follow va
 * `EC2_PRIVATE_KEY`
 * `EC2_CERT`
 
+Note: to remove an account, just remove the subdirectory of $AWS_DIR/auth with the account name
+
 ### ToDo
 
 * await feedback from users
