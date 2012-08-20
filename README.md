@@ -68,6 +68,7 @@ Note: to remove an account, just remove the subdirectory of $AWS_DIR/auth with t
 
 ### ToDo
 
+* create "upgrade" feature to implement new aliases, etc. for 3rd party AWS tools
 * await feedback from users
 * add more error checking to inputs on create/import
 
