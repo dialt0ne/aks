@@ -161,9 +161,9 @@ aks()
 				read TARGET_EC2_SECRET
 				# ToDo - add error checking here
 			done
-			EC2_ID="TARGET_EC2_ID"
-			EC2_ACCESS="TARGET_EC2_ACCESS"
-			EC2_SECRET="TARGET_EC2_SECRET"
+			EC2_ID="$TARGET_EC2_ID"
+			EC2_ACCESS="$TARGET_EC2_ACCESS"
+			EC2_SECRET="$TARGET_EC2_SECRET"
 			AWS_ACCOUNT="$TARGET_AWS_ACCOUNT"
 			_aks_create_auth_info $AWS_DIR $AWS_ACCOUNT $EC2_ID $EC2_ACCESS $EC2_SECRET
 			echo "your new singing certificate [copy/paste into IAM Signing Certificates]:"
