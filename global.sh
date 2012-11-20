@@ -27,8 +27,11 @@ pathmunge () {
     fi
   fi
 }
-#export JAVA_HOME=/usr/lib/jvm/java-1.6.0-sun-1.6.0.11/jre
-export JAVA_HOME=/usr/java/latest
+if [ -z "$JAVA_HOME" ]
+then
+        #export JAVA_HOME=/usr/lib/jvm/java-1.6.0-sun-1.6.0.11/jre
+        export JAVA_HOME=/usr/java/latest
+fi
 #
 export EC2_HOME=$AWS_DIR/tools/api-tools
 pathmunge $EC2_HOME/bin after
