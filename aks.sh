@@ -100,12 +100,6 @@ _aks_process_auth_info()
 		echo "secret_key = $EC2_SECRET"
 	) > $AWS_ACCOUNT.s3cfg
 	chmod 600 $AWS_ACCOUNT.s3cfg
-	# awssecrets file
-	(
-		echo "$EC2_ACCESS"
-		echo "$EC2_SECRET"
-	) > $AWS_ACCOUNT.awssecrets
-	chmod 600 $AWS_ACCOUNT.awssecrets
 	# env file
 	(
 		echo "export EC2_ID=$EC2_ID";
