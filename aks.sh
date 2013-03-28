@@ -100,6 +100,17 @@ _aks_process_auth_info()
 		echo "secret_key = $EC2_SECRET"
 	) > $AWS_ACCOUNT.s3cfg
 	chmod 600 $AWS_ACCOUNT.s3cfg
+	# .s3curl file
+	cat > .s3curl << EOF
+%awsSecretAccessKeys = (
+  $AWS_ACCOUNT => {
+    id => '$EC2_ACCESS',
+    key => '$EC2_SECRET',
+  },
+);
+EOF
+	chmod 600 .s3curl
+    ln -s ../../tools/s3-curl/s3curl.pl
 	# env file
 	(
 		echo "export EC2_ID=$EC2_ID";
@@ -114,6 +125,7 @@ _aks_process_auth_info()
 		echo "export AWS_ACCESS_KEY_ID=$EC2_ACCESS";
 		echo "export AWS_ACCESS_SECRET_KEY=$EC2_SECRET";
         echo "export AWS_DEFAULT_REGION=us-east-1";
+        echo "alias s3curl.pl='$AWS_DIR/auth/$AWS_ACCOUNT/s3curl.pl --id=$AWS_ACCOUNT'";
 	) > $AWS_ACCOUNT-env.sh
 	chmod 500 $AWS_ACCOUNT-env.sh
 	popd > /dev/null
