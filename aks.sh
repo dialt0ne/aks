@@ -115,7 +115,11 @@ _aks_process_auth_info()
 		echo "export EC2_CERT=\$AWS_DIR/auth/$AWS_ACCOUNT/cert-$AWS_ACCOUNT.pem";
 		echo "export AWS_CREDENTIAL_FILE=\$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT.cred"
 		echo "alias s3cmd='s3cmd --config=\$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT.s3cfg'"
-		echo "alias aws='aws --secrets-file=\$AWS_DIR/auth/$AWS_ACCOUNT/$AWS_ACCOUNT.awssecrets'"
+		echo "export EC2_ACCESS_KEY=$EC2_ACCESS";
+		echo "export EC2_SECRET_KEY=$EC2_SECRET";
+		echo "export AWS_ACCESS_KEY_ID=$EC2_ACCESS";
+		echo "export AWS_ACCESS_SECRET_KEY=$EC2_SECRET";
+        echo "export AWS_DEFAULT_REGION=us-east-1";
 	) > $AWS_ACCOUNT-env.sh
 	chmod 500 $AWS_ACCOUNT-env.sh
 	popd > /dev/null
