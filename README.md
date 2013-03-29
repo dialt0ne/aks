@@ -64,11 +64,27 @@ When importing your IAM credentials from the existing environment, the follow va
 * `EC2_PRIVATE_KEY`
 * `EC2_CERT`
 
-Note: to remove an account, just remove the subdirectory of $AWS_DIR/auth with the account name
+### Notes
+
+1. To remove an account, just remove the subdirectory of $AWS_DIR/auth with the account name
+
+2. To upgrade your accounts to have all the latest variables exported, try this shell snippet:
+
+        tar zcvf /tmp/`date +%Y%m%d-%H%M%S`-aks-auth.tar.gz $AWS_DIR/auth
+        cd $AWS_DIR/auth
+        ACCTS=`echo *`
+        for i in $ACCTS;
+        do
+            aks use $i;
+            aks import $i.tmp;
+            rm -rf $AWS_DIR/auth/$i;
+            aks import $i;
+            rm -rf $AWS_DIR/auth/$i.tmp;
+            echo Account $i upgraded;
+        done
 
 ### ToDo
 
-* create "upgrade" feature to implement new aliases, etc. for 3rd party AWS tools
 * await feedback from users
 * add more error checking to inputs on create/import
 
