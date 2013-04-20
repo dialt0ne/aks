@@ -21,7 +21,7 @@ EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.) from a global script.
 
 * Uses bash tab-completion for arguments, account names
 * Sets proper permissions on files/directories so only you can see your keys
-* Can imports keys/certificates based on existing environment variables
+* Can import keys/certificates based on existing environment variables
 
 ### How to install
 
@@ -36,6 +36,11 @@ EC2_AMITOOL_HOME, AWS_IAM_HOME, etc. etc.) from a global script.
 	mkdir auth
 	vi aks.sh global.sh
 	# customize variables as needed
+
+#### Example:
+
+* On my work Kubuntu box, I use `$HOME/aws`, so no change is needed. However I do set in my .bashrc `export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64`
+* On my Mac at home, I set `export AWS_DIR="$HOME/work/aws"` and `export JAVA_HOME=$(/usr/libexec/java_home)` in my .bashrc
 
 ### Usage
 
