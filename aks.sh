@@ -124,6 +124,7 @@ EOF
 		echo "export EC2_SECRET_KEY=$EC2_SECRET";
 		echo "export AWS_ACCESS_KEY_ID=$EC2_ACCESS";
 		echo "export AWS_ACCESS_SECRET_KEY=$EC2_SECRET";
+		echo "export AWS_SECRET_ACCESS_KEY=$EC2_SECRET";
         echo "export AWS_DEFAULT_REGION=us-east-1";
         echo "alias s3curl.pl='$AWS_DIR/auth/$AWS_ACCOUNT/s3curl.pl --id=$AWS_ACCOUNT'";
 	) > $AWS_ACCOUNT-env.sh
