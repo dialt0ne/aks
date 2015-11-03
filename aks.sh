@@ -66,7 +66,7 @@ _aks_process_auth_info()
 	EC2_PRIVATE_KEY="pk-$AWS_ACCOUNT.pem"
 	EC2_CERT="cert-$AWS_ACCOUNT.pem"
 	# per-account directory 
-	mkdir -m 0700 $AWS_DIR/auth/$AWS_ACCOUNT
+	mkdir -pm 0700 $AWS_DIR/auth/$AWS_ACCOUNT
 	pushd $AWS_DIR/auth/$AWS_ACCOUNT > /dev/null
 	# signing cert
 	if [ "$AKS_OPER" = "create" ]
